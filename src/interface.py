@@ -477,7 +477,7 @@ class CalculatorGUI(ctk.CTk):
         else:
             self.add_matrix_button.pack(pady=(0, 10))
 
-    def on_dimension_change(self):
+    def on_dimension_change(self, value=None):
         """Called when combo box values change"""
         # Don't allow dimension changes for Ans matrix
         if self.current_matrix_name == "Ans":
