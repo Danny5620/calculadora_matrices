@@ -1,6 +1,6 @@
 # Calculadora de Matrices
 
-Una calculadora de matrices avanzada con interfaz gráfica moderna desarrollada en Python con CustomTkinter.
+Una calculadora de matrices con interfaz gráfica moderna desarrollada en Python con CustomTkinter.
 
 ## Características
 
