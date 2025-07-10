@@ -149,7 +149,6 @@ class Matrix:
 
         return determinant
 
-
     def inverse(self):
         """Calculates the inverse of the matrix."""
         if self.rows != self.cols:

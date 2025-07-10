@@ -106,7 +106,7 @@ class CalculatorGUI(ctk.CTk):
         self.matrix1_label = ctk.CTkLabel(self.selectors_frame,
                                           text="Matriz A:")
         self.matrix1_combo = ctk.CTkComboBox(self.selectors_frame,
-                                             values=["Seleccionar..."],
+                                             values=["Seleccionar"],
                                              width=120,
                                              state="readonly")
 
@@ -114,7 +114,7 @@ class CalculatorGUI(ctk.CTk):
         self.matrix2_label = ctk.CTkLabel(self.selectors_frame,
                                           text="Matriz B:")
         self.matrix2_combo = ctk.CTkComboBox(self.selectors_frame,
-                                             values=["Seleccionar..."],
+                                             values=["Seleccionar"],
                                              width=120,
                                              state="readonly")
 
@@ -378,9 +378,9 @@ class CalculatorGUI(ctk.CTk):
 
         # Reset selections if current selection is no longer valid
         if self.matrix1_combo.get() not in matrix_names:
-            self.matrix1_combo.set("Seleccionar...")
+            self.matrix1_combo.set("Seleccionar")
         if self.matrix2_combo.get() not in matrix_names:
-            self.matrix2_combo.set("Seleccionar...")
+            self.matrix2_combo.set("Seleccionar")
 
     def update_save_selector(self):
         """Update the save dropdown with available matrices"""
@@ -567,12 +567,21 @@ class CalculatorGUI(ctk.CTk):
         self.populate_grid_from_current_matrix()
 
         # Add button to create/update Matrix object from input (not for Ans matrix)
+        # Add button to fill matrix with random values (not for Ans matrix)
         if not is_ans:
             create_button = ctk.CTkButton(self.matrix_frame,
                                           text="Crear/Actualizar Matriz",
                                           command=self.create_matrix_object,
                                           width=200)
             create_button.pack(pady=10)
+
+            random_button = ctk.CTkButton(self.matrix_frame,
+                                          text="Random",
+                                          command=self.fill_random_matrix,
+                                          width=100,
+                                          fg_color="green",
+                                          hover_color="darkgreen")
+            random_button.pack(side="left", padx=5)
 
     def handle_key_navigation(self, event, row, col):
         """Handle arrow key navigation in matrix grid"""
@@ -715,6 +724,38 @@ class CalculatorGUI(ctk.CTk):
             # Create new empty grid
             self.create_matrix_grid()
 
+    def fill_random_matrix(self):
+        """Fill the current matrix with random numbers between -10 and 10"""
+        import random
+
+        # Don't allow random fill for Ans matrix
+        if self.current_matrix_name == "Ans":
+            self.show_error(
+                "No se puede llenar la matriz Ans con números aleatorios")
+            return
+
+        # Check if we have entry widgets
+        if not hasattr(self, 'entry_widgets') or not self.entry_widgets:
+            self.show_error("No hay matriz para llenar")
+            return
+
+        try:
+            # Fill each entry with a random number
+            for i, row in enumerate(self.entry_widgets):
+                for j, entry in enumerate(row):
+                    # Generate random number between -10 and 10 with 2 decimal places
+                    random_value = round(random.uniform(-10, 10), 2)
+
+                    # Clear the entry and insert the random value
+                    entry.delete(0, "end")
+                    entry.insert(0, str(random_value))
+
+            # Update the matrix title to show it was filled with random numbers
+            self.update_matrix_title("(Números aleatorios)")
+
+        except Exception as e:
+            self.show_error(f"Error al llenar con números aleatorios: {str(e)}")
+
     def update_matrix_title(self, status_text=""):
         """Update the matrix title with current info"""
         rows = int(self.row_combo.get())
@@ -744,12 +785,12 @@ class CalculatorGUI(ctk.CTk):
 
         if matrix1_name == "Ans":
             matrix1 = self.ans_matrix
-        elif matrix1_name != "Seleccionar...":
+        elif matrix1_name != "Seleccionar":
             matrix1 = self.matrices.get(matrix1_name)
 
         if matrix2_name == "Ans":
             matrix2 = self.ans_matrix
-        elif matrix2_name != "Seleccionar...":
+        elif matrix2_name != "Seleccionar":
             matrix2 = self.matrices.get(matrix2_name)
 
         return matrix1, matrix2
@@ -809,7 +850,7 @@ class CalculatorGUI(ctk.CTk):
 
         if matrix1_name == "Ans":
             matrix1 = self.ans_matrix
-        elif matrix1_name != "Seleccionar...":
+        elif matrix1_name != "Seleccionar":
             matrix1 = self.matrices.get(matrix1_name)
 
         if not matrix1:
@@ -830,7 +871,7 @@ class CalculatorGUI(ctk.CTk):
 
         if matrix1_name == "Ans":
             matrix1 = self.ans_matrix
-        elif matrix1_name != "Seleccionar...":
+        elif matrix1_name != "Seleccionar":
             matrix1 = self.matrices.get(matrix1_name)
 
         if not matrix1:
@@ -850,7 +891,7 @@ class CalculatorGUI(ctk.CTk):
 
         if matrix1_name == "Ans":
             matrix1 = self.ans_matrix
-        elif matrix1_name != "Seleccionar...":
+        elif matrix1_name != "Seleccionar":
             matrix1 = self.matrices.get(matrix1_name)
 
         if not matrix1:
@@ -871,7 +912,7 @@ class CalculatorGUI(ctk.CTk):
 
         if matrix1_name == "Ans":
             matrix1 = self.ans_matrix
-        elif matrix1_name != "Seleccionar...":
+        elif matrix1_name != "Seleccionar":
             matrix1 = self.matrices.get(matrix1_name)
 
         if not matrix1:
@@ -897,7 +938,7 @@ class CalculatorGUI(ctk.CTk):
 
         if matrix1_name == "Ans":
             matrix1 = self.ans_matrix
-        elif matrix1_name != "Seleccionar...":
+        elif matrix1_name != "Seleccionar":
             matrix1 = self.matrices.get(matrix1_name)
 
         if not matrix1:
