@@ -32,6 +32,9 @@ class CalculatorGUI(ctk.CTk):
         self.left_frame = ctk.CTkFrame(self)
         self.right_frame = ctk.CTkFrame(self)
 
+        # Create scrollable frame for right side
+        self.right_scroll_frame = ctk.CTkScrollableFrame(self.right_frame)
+
         # Left frame widgets (matrix input)
         self.combo_frame = ctk.CTkFrame(self.left_frame)
 
@@ -88,18 +91,18 @@ class CalculatorGUI(ctk.CTk):
                                                command=self.create_new_matrix)
 
         # Right frame widgets (operations)
-        self.operations_label = ctk.CTkLabel(self.right_frame,
+        self.operations_label = ctk.CTkLabel(self.right_scroll_frame,
                                              text="Operaciones de Matrices",
                                              font=("Arial", 16, "bold"))
 
-        self.operations_frame = ctk.CTkFrame(self.right_frame)
+        self.operations_frame = ctk.CTkFrame(self.right_scroll_frame)
 
         # Initialize operations widgets
         self.initialize_operations_widgets()
 
     def initialize_operations_widgets(self):
         """Initialize all operation-related widgets"""
-        # Matrix selectors frame
+        # Matrix selectors and scalar input frame
         self.selectors_frame = ctk.CTkFrame(self.operations_frame)
 
         # First matrix selector
@@ -118,10 +121,9 @@ class CalculatorGUI(ctk.CTk):
                                              width=120,
                                              state="readonly")
 
-        # Scalar input frame
-        self.scalar_frame = ctk.CTkFrame(self.operations_frame)
-        self.scalar_label = ctk.CTkLabel(self.scalar_frame, text="Escalar:")
-        self.scalar_entry = ctk.CTkEntry(self.scalar_frame, width=80,
+        # Scalar input
+        self.scalar_label = ctk.CTkLabel(self.selectors_frame, text="Escalar:")
+        self.scalar_entry = ctk.CTkEntry(self.selectors_frame, width=80,
                                          placeholder_text="1.0")
 
         # Binary operations (3 buttons)
@@ -187,6 +189,12 @@ class CalculatorGUI(ctk.CTk):
     def initialize_expression_widgets(self):
         """Initialize expression input widgets"""
         self.expression_frame = ctk.CTkFrame(self.operations_frame)
+
+        # Combined operations title with expression input
+        combined_label = ctk.CTkLabel(self.expression_frame,
+                                     text="Operaciones Combinadas",
+                                     font=("Arial", 14, "bold"))
+        combined_label.pack(pady=(10, 5))
 
         # Expression input section
         expression_input_frame = ctk.CTkFrame(self.expression_frame)
@@ -268,6 +276,9 @@ class CalculatorGUI(ctk.CTk):
         self.right_frame.pack(side="right", fill="both", expand=True,
                               padx=(5, 10), pady=10)
 
+        # Pack scrollable frame in right frame
+        self.right_scroll_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
         # Left frame layout
         self.order_label.pack(pady=10)
 
@@ -318,16 +329,13 @@ class CalculatorGUI(ctk.CTk):
 
     def pack_operations_widgets(self):
         """Pack all operations widgets"""
-        # Matrix selectors
+        # Matrix selectors and scalar input
         self.selectors_frame.pack(pady=10, fill="x")
         self.matrix1_label.pack(side="left", padx=(10, 5))
         self.matrix1_combo.pack(side="left", padx=5)
         self.matrix2_label.pack(side="left", padx=(20, 5))
         self.matrix2_combo.pack(side="left", padx=5)
-
-        # Scalar input
-        self.scalar_frame.pack(pady=10, fill="x")
-        self.scalar_label.pack(side="left", padx=(10, 5))
+        self.scalar_label.pack(side="left", padx=(20, 5))
         self.scalar_entry.pack(side="left", padx=5)
 
         # Binary operations - just buttons
@@ -346,12 +354,6 @@ class CalculatorGUI(ctk.CTk):
         self.scalar_ops_frame.pack(pady=10)
         self.scalar_mult_button.pack(side="left", padx=5)
         self.scalar_div_button.pack(side="left", padx=5)
-
-        # Add combined operations section
-        combined_label = ctk.CTkLabel(self.operations_frame,
-                                     text="Operaciones Combinadas",
-                                     font=("Arial", 14, "bold"))
-        combined_label.pack(pady=(20, 10))
 
         # Pack expression widgets
         self.expression_frame.pack(pady=10, fill="x")
@@ -642,8 +644,9 @@ class CalculatorGUI(ctk.CTk):
     def populate_grid_from_current_matrix(self):
         """Populate the grid with values from the currently selected matrix"""
         matrix = None
+        is_ans = self.current_matrix_name == "Ans"
 
-        if self.current_matrix_name == "Ans" and self.ans_matrix:
+        if is_ans and self.ans_matrix:
             matrix = self.ans_matrix
         elif (self.current_matrix_name and
               self.current_matrix_name in self.matrices):
@@ -656,12 +659,18 @@ class CalculatorGUI(ctk.CTk):
             # Clear all entries first
             for i in range(grid_rows):
                 for j in range(grid_cols):
+                    # Temporarily enable entry if it's disabled (for Ans matrix)
+                    if is_ans:
+                        self.entry_widgets[i][j].configure(state="normal")
                     self.entry_widgets[i][j].delete(0, "end")
 
             # Populate with matrix data
             for i in range(min(matrix.rows, grid_rows)):
                 for j in range(min(matrix.cols, grid_cols)):
                     self.entry_widgets[i][j].insert(0, str(matrix.data[i][j]))
+                    # Disable entry again if it's Ans matrix
+                    if is_ans:
+                        self.entry_widgets[i][j].configure(state="disabled")
 
     def create_matrix_object(self):
         """Creates or updates Matrix object from the input grid values"""
@@ -743,8 +752,8 @@ class CalculatorGUI(ctk.CTk):
             # Fill each entry with a random number
             for i, row in enumerate(self.entry_widgets):
                 for j, entry in enumerate(row):
-                    # Generate random number between -10 and 10 with 2 decimal places
-                    random_value = round(random.uniform(-10, 10), 2)
+                    # Generate random integer number between -30 and 30
+                    random_value = random.randint(-30, 30)
 
                     # Clear the entry and insert the random value
                     entry.delete(0, "end")
@@ -1110,6 +1119,5 @@ class CalculatorGUI(ctk.CTk):
 if __name__ == "__main__":
     ctk.set_appearance_mode("Dark")
     ctk.set_default_color_theme("blue")
-
     app = CalculatorGUI()
     app.mainloop()
